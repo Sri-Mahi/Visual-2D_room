@@ -1,0 +1,111 @@
+<!--I want a 2D wall (a rectangular piece) using any of JSX, JS, HTML, CSS, with the mandatory use of canvas, 
+giving the client an option of four elements: a solid wall, a gradient wall, a pattern wall, and a wallpaper wall.
+for the wallpaper, with a seperate section color picker too. -->
+<!DOCTYPE html>
+<html lang="en">  
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Wall Canvas</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 1px solid #000;
+            margin-top: 20px;
+        }
+        .controls {
+            margin-bottom: 20px;
+        }
+    </style>  
+</head>
+<body>
+    <div class="controls">
+        <label for="wallType">Choose Wall Type:</label>
+        <select id="wallType">
+            <option value="solid">Solid Wall</option>
+            <option value="gradient">Gradient Wall</option>
+            <option value="pattern">Pattern Wall</option>
+            <option value="wallpaper">Wallpaper Wall</option>
+        </select>
+
+        <input type="color" id="wallColor" value="#ff0000" style="display: none;">
+        <input type="file" id="wallpaperFile" accept="image/*" style="display: none;">
+    </div>
+
+    <canvas id="wallCanvas" width="600" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById('wallCanvas');
+        const ctx = canvas.getContext('2d');
+        const wallTypeSelect = document.getElementById('wallType'); 
+        const wallColorInput = document.getElementById('wallColor');
+        const wallpaperFileInput = document.getElementById('wallpaperFile');
+        let wallpaperImage = new Image();
+        let patternCanvas = document.createElement('canvas');
+        let patternCtx = patternCanvas.getContext('2d');
+        patternCanvas.width = 50;
+        patternCanvas.height = 50;
+        patternCtx.fillStyle = '#ccc';
+        patternCtx.fillRect(0, 0, 50, 50);
+        patternCtx.fillStyle = '#000';
+        patternCtx.fillRect(0, 0, 50, 50);
+        patternCtx.fillStyle = '#fff';
+        patternCtx.fillRect(10, 10, 30, 30);
+      </script>
+    <script>
+        function drawWall() {
+            const wallType = wallTypeSelect.value;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (wallType === 'solid') {
+                ctx.fillStyle = wallColorInput.value;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else if (wallType === 'gradient') {
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, wallColorInput.value);
+                gradient.addColorStop(1, '#ffffff');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else if (wallType === 'pattern') {
+                ctx.fillStyle = ctx.createPattern(patternCanvas, 'repeat');
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else if (wallType === 'wallpaper') {
+                if (wallpaperImage.src) {
+                    ctx.drawImage(wallpaperImage, 0, 0, canvas.width, canvas.height);
+                }
+            }
+        }
+
+        wallTypeSelect.addEventListener('change', () => {
+            wallColorInput.style.display = wallTypeSelect.value === 'solid' || wallTypeSelect.value === 'gradient' ? 'inline' : 'none';
+            wallpaperFileInput.style.display = wallTypeSelect.value === 'wallpaper' ? 'inline' : 'none';
+            drawWall();
+        });
+
+        wallColorInput.addEventListener('input', drawWall);
+
+        wallpaperFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    wallpaperImage.src = e.target.result;
+                    wallpaperImage.onload = drawWall;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Initial draw
+        drawWall();
+    </script>
+</body>
+</html>
+</body>
+</html>
+<!-- This code creates a simple web page with a canvas where users can select different types of walls
